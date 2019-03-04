@@ -4,7 +4,11 @@ module SimpleGit
 
     def initialize(path)
       wrapper = RepositoryWrapper.new
-      Git2.git_repository_open(wrapper, path)
+      ret = Git2.git_repository_open(wrapper, path)
+      if ret != 0
+        error = Git2::GitError.new(Git2.giterr_last)
+        raise ArgumentError, error[:message].read_string
+      end
 
       @ptr = wrapper[:repo]
 
