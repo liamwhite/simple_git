@@ -3,7 +3,7 @@ module SimpleGit
     attr_reader :ptr
 
     def initialize
-      @ptr = SimpleGit2::GitDiffOption.new
+      @ptr = Git2::GitDiffOption.new
       @ptr[:version] = 1
     end
 

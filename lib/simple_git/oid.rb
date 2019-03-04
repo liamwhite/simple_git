@@ -3,15 +3,13 @@ module SimpleGit
     attr_accessor :ptr
 
     def initialize
-      @ptr = SimpleGit2::GitOid.new
+      @ptr = Git2::GitOid.new
     end
 
     def to_s
-      @str ||= begin
-        string = FFI::MemoryPointer.new(:char, 41)
-        SimpleGit2.git_oid_tostr(string, 41, @ptr)
-        string.read_string
-      end
+      string = FFI::MemoryPointer.new(:char, 41)
+      Git2.git_oid_tostr(string, 41, @ptr)
+      string.read_string
     end
 
     def [](*args)

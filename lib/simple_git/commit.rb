@@ -4,15 +4,18 @@ module SimpleGit
 
     def initialize(repo, oid)
       wrapper = CommitWrapper.new
-      SimpleGit2.git_commit_lookup(wrapper, repo.ptr, oid.ptr)
+      Git2.git_commit_lookup(wrapper, repo.ptr, oid.ptr)
 
+      @repo = repo
+      @oid = oid.to_s
       @ptr = wrapper[:commit]
+
       ObjectSpace.define_finalizer(self, self.class.finalize(@ptr))
     end
 
     def parent(n)
       wrapper = CommitWrapper.new
-      SimpleGit2.git_commit_parent(wrapper, @ptr, n)
+      Git2.git_commit_parent(wrapper, @ptr, n)
 
       c = Commit.allocate
       c.ptr = wrapper[:commit]
@@ -22,33 +25,38 @@ module SimpleGit
     end
 
     def parent_count
-      SimpleGit2.git_commit_parentcount(@ptr)
+      Git2.git_commit_parentcount(@ptr)
     end
 
     def tree
-      Tree.new.from_commit(self)
+      @tree ||= Tree.new.from_commit(self)
     end
 
     def author
-      Signature.new(self)
+      @author ||= Signature.new(self)
     end
 
     def message
-      SimpleGit2.git_commit_message(@ptr).read_string
+      @message ||= Git2.git_commit_message(@ptr).read_string
     end
 
-    def diff(new_commit, options)
-      Diff.new.from_trees(tree, new_commit.tree, options)
+    def oid
+      @oid
+    end
+
+    def diff(new_commit, options = nil)
+      @diffs ||= {}
+      @diffs[options] ||= Diff.new.from_trees(@repo, tree, new_commit.tree, options || DiffOptions.new)
     end
 
     private
     
     def self.finalize(ptr)
-      proc { SimpleGit2.git_commit_free(ptr) }
+      proc { Git2.git_commit_free(ptr) }
     end
 
     class CommitWrapper < FFI::Struct
-      layout :commit, SimpleGit2::GitCommit.by_ref
+      layout :commit, Git2::GitCommit.by_ref
     end
   end
 end

@@ -3,15 +3,15 @@ module SimpleGit
     attr_accessor :ptr
 
     def initialize(commit)
-      @ptr = SimpleGit2.git_commit_author(commit.ptr)
+      @ptr = Git2::GitSignature.new(Git2.git_commit_author(commit.ptr))
     end
 
     def name
-      @ptr[:name]
+      @name ||= @ptr[:name].read_string
     end
 
     def email
-      @ptr[:email]
+      @email ||= @ptr[:email].read_string
     end
   end
 end

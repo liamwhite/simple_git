@@ -4,20 +4,22 @@ module SimpleGit
     
     def from_commit(commit)
       wrapper = TreeWrapper.new
-      SimpleGit2.git_commit_tree(wrapper, commit.ptr)
+      Git2.git_commit_tree(wrapper, commit.ptr)
 
       @ptr = wrapper[:tree]
       ObjectSpace.define_finalizer(self, self.class.finalize(@ptr))
+
+      self
     end
 
     private
 
     def self.finalize(ptr)
-      proc { SimpleGit2.git_tree_free(ptr) }
+      proc { Git2.git_tree_free(ptr) }
     end
 
     class TreeWrapper < FFI::Struct
-      layout :tree, SimpleGit2::GitTree.by_ref
+      layout :tree, Git2::GitTree.by_ref
     end
   end
 end

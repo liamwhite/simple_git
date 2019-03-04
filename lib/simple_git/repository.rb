@@ -4,21 +4,28 @@ module SimpleGit
 
     def initialize(path)
       wrapper = RepositoryWrapper.new
-      SimpleGit2.git_repository_open(wrapper, path)
+      Git2.git_repository_open(wrapper, path)
 
       @ptr = wrapper[:repo]
 
       ObjectSpace.define_finalizer(self, self.class.finalize(@ptr))
     end
 
+    def revparse(refspec)
+      wrapper = SimpleGit::Object::ObjectWrapper.new
+      Git2.git_revparse_single(wrapper, @ptr, refspec)
+
+      Object.new.from_wrapper(wrapper)
+    end
+
     private
     
     def self.finalize(ptr)
-      proc { SimpleGit2.git_repository_free(ptr) }
+      proc { Git2.git_repository_free(ptr) }
     end
 
     class RepositoryWrapper < FFI::Struct
-      layout :repo, SimpleGit2::GitRepository.by_ref
+      layout :repo, Git2::GitRepository.by_ref
     end
   end
 end
