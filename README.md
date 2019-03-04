@@ -15,7 +15,7 @@ puts "Current HEAD: #{repo.revparse('HEAD')}\n"
 walk.sort(:GIT_SORT_TOPOLOGICAL)
 walk.push_head
 
-puts 'Last 25 commits:\n'
+puts "Last 25 commits:\n"
 
 walk.take(25).each do |c|
   next if c.parent_count != 1
