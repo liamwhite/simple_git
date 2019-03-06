@@ -6,7 +6,11 @@ module SimpleGit
 
     def initialize(repo)
       wrapper = RevwalkWrapper.new
-      Git2.git_revwalk_new(wrapper, repo.ptr)
+      ret = Git2.git_revwalk_new(wrapper, repo.ptr)
+      if ret != 0
+        error = Git2::GitError.new(Git2.giterr_last)
+        raise ArgumentError, error[:message].read_string
+      end
 
       @repo = repo
       @ptr = wrapper[:revwalk]

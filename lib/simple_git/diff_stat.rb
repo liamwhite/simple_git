@@ -4,7 +4,11 @@ module SimpleGit
 
     def initialize(diff)
       wrapper = DiffStatWrapper.new
-      Git2.git_diff_get_stats(wrapper, diff.ptr)
+      ret = Git2.git_diff_get_stats(wrapper, diff.ptr)
+      if ret != 0
+        error = Git2::GitError.new(Git2.giterr_last)
+        raise ArgumentError, error[:message].read_string
+      end
 
       @ptr = wrapper[:stat]
       ObjectSpace.define_finalizer(self, self.class.finalize(@ptr))

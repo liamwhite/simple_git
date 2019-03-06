@@ -4,7 +4,11 @@ module SimpleGit
 
     def from_trees(repo, old_tree, new_tree, options)
       wrapper = DiffWrapper.new
-      Git2.git_diff_tree_to_tree(wrapper, repo.ptr, old_tree.ptr, new_tree.ptr, options.ptr)
+      ret = Git2.git_diff_tree_to_tree(wrapper, repo.ptr, old_tree.ptr, new_tree.ptr, options.ptr)
+      if ret != 0
+        error = Git2::GitError.new(Git2.giterr_last)
+        raise ArgumentError, error[:message].read_string
+      end
 
       @ptr = wrapper[:diff]
       ObjectSpace.define_finalizer(self, self.class.finalize(@ptr))

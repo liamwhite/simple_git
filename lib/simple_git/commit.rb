@@ -4,7 +4,11 @@ module SimpleGit
 
     def initialize(repo, oid)
       wrapper = CommitWrapper.new
-      Git2.git_commit_lookup(wrapper, repo.ptr, oid.ptr)
+      ret = Git2.git_commit_lookup(wrapper, repo.ptr, oid.ptr)
+      if ret != 0
+        error = Git2::GitError.new(Git2.giterr_last)
+        raise ArgumentError, error[:message].read_string
+      end
 
       @repo = repo
       @oid = oid.to_s
@@ -15,7 +19,11 @@ module SimpleGit
 
     def parent(n)
       wrapper = CommitWrapper.new
-      Git2.git_commit_parent(wrapper, @ptr, n)
+      ret = Git2.git_commit_parent(wrapper, @ptr, n)
+      if ret != 0
+        error = Git2::GitError.new(Git2.giterr_last)
+        raise ArgumentError, error[:message].read_string
+      end
 
       c = Commit.allocate
       c.ptr = wrapper[:commit]
@@ -37,7 +45,7 @@ module SimpleGit
     end
 
     def message
-      @message ||= Git2.git_commit_message(@ptr).read_string
+      @message ||= Git2.git_commit_message(@ptr)&.read_string
     end
 
     def oid

@@ -17,7 +17,11 @@ module SimpleGit
 
     def revparse(refspec)
       wrapper = SimpleGit::Object::ObjectWrapper.new
-      Git2.git_revparse_single(wrapper, @ptr, refspec)
+      ret = Git2.git_revparse_single(wrapper, @ptr, refspec)
+      if ret != 0
+        error = Git2::GitError.new(Git2.giterr_last)
+        raise ArgumentError, error[:message].read_string
+      end
 
       Object.new.from_wrapper(wrapper)
     end
