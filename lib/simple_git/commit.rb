@@ -1,6 +1,6 @@
 module SimpleGit
   class Commit
-    attr_accessor :ptr
+    attr_accessor :ptr, :repo, :oid
 
     def initialize(repo, oid)
       wrapper = CommitWrapper.new
@@ -26,6 +26,8 @@ module SimpleGit
       end
 
       c = Commit.allocate
+      c.repo = @repo
+      # fixme: oid
       c.ptr = wrapper[:commit]
       ObjectSpace.define_finalizer(c, c.class.finalize(c.ptr))
 
@@ -50,6 +52,10 @@ module SimpleGit
 
     def oid
       @oid
+    end
+
+    def time
+      Time.at(Git2.git_commit_time(@ptr))
     end
 
     def diff(new_commit, options = nil)
