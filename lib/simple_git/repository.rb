@@ -26,6 +26,10 @@ module SimpleGit
       Object.new.from_wrapper(wrapper)
     end
 
+    def head
+      Reference.new.from_head(self)
+    end
+
     private
     
     def self.finalize(ptr)
